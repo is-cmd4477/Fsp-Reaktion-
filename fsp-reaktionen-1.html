@@ -1,0 +1,1090 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0a0f1a">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<title>FSP Reaktionen</title>
+<link rel="manifest" href="#" id="manifest-link">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Noto+Kufi+Arabic:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #080d18;
+    --surface: #0f1829;
+    --surface2: #162035;
+    --border: #1e3058;
+    --accent: #00d4ff;
+    --accent2: #ff6b35;
+    --green: #00ff88;
+    --text: #e8eef8;
+    --muted: #5a7090;
+    --card-glow: 0 0 40px rgba(0,212,255,0.08);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'IBM Plex Mono', monospace;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Grid background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,212,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,212,255,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .app { position: relative; z-index: 1; max-width: 480px; margin: 0 auto; padding: 16px; min-height: 100vh; }
+
+  /* Header */
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 0 24px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 24px;
+  }
+
+  .logo {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--accent);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  .logo span { color: var(--muted); }
+
+  .notif-badge {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: var(--muted);
+    cursor: pointer;
+    padding: 6px 10px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    transition: all 0.2s;
+  }
+
+  .notif-badge:hover { border-color: var(--accent); color: var(--accent); }
+  .notif-badge.active { color: var(--green); border-color: var(--green); }
+
+  .dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+
+  /* Tabs */
+  .tabs {
+    display: flex;
+    gap: 4px;
+    background: var(--surface);
+    border-radius: 8px;
+    padding: 4px;
+    margin-bottom: 24px;
+    border: 1px solid var(--border);
+  }
+
+  .tab {
+    flex: 1;
+    padding: 8px;
+    text-align: center;
+    font-size: 11px;
+    font-family: 'IBM Plex Mono', monospace;
+    letter-spacing: 1px;
+    cursor: pointer;
+    border-radius: 5px;
+    border: none;
+    background: transparent;
+    color: var(--muted);
+    transition: all 0.2s;
+  }
+
+  .tab.active {
+    background: var(--surface2);
+    color: var(--accent);
+    border: 1px solid var(--border);
+  }
+
+  /* Section */
+  .section { display: none; }
+  .section.active { display: block; }
+
+  /* Flashcard */
+  .card-wrapper {
+    perspective: 1000px;
+    margin-bottom: 20px;
+    cursor: pointer;
+  }
+
+  .card {
+    position: relative;
+    min-height: 220px;
+    transform-style: preserve-3d;
+    transition: transform 0.5s cubic-bezier(0.4,0,0.2,1);
+    border-radius: 12px;
+  }
+
+  .card.flipped { transform: rotateY(180deg); }
+
+  .card-face {
+    position: absolute;
+    inset: 0;
+    border-radius: 12px;
+    padding: 28px 24px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    backface-visibility: hidden;
+    border: 1px solid var(--border);
+    box-shadow: var(--card-glow);
+  }
+
+  .card-front {
+    background: linear-gradient(135deg, var(--surface) 0%, var(--surface2) 100%);
+  }
+
+  .card-back {
+    background: linear-gradient(135deg, #0d1f2d 0%, #102030 100%);
+    transform: rotateY(180deg);
+    border-color: rgba(0,212,255,0.2);
+  }
+
+  .card-lang {
+    font-size: 10px;
+    letter-spacing: 2px;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 16px;
+  }
+
+  .card-de {
+    font-size: 16px;
+    font-weight: 600;
+    color: var(--text);
+    line-height: 1.5;
+    margin-bottom: 12px;
+    direction: ltr;
+    text-align: center;
+  }
+
+  .card-ar {
+    font-family: 'Noto Kufi Arabic', sans-serif;
+    font-size: 15px;
+    color: var(--accent);
+    line-height: 1.6;
+    margin-top: 8px;
+  }
+
+  .card-hint {
+    position: absolute;
+    bottom: 12px;
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 1px;
+  }
+
+  .card-category {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    font-size: 9px;
+    padding: 3px 8px;
+    border-radius: 3px;
+    background: rgba(0,212,255,0.1);
+    color: var(--accent);
+    letter-spacing: 1px;
+  }
+
+  /* Navigation */
+  .nav-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+
+  .btn {
+    flex: 1;
+    padding: 12px;
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    letter-spacing: 1px;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: all 0.2s;
+  }
+
+  .btn:hover { border-color: var(--accent); color: var(--accent); }
+  .btn.primary { background: rgba(0,212,255,0.1); border-color: var(--accent); color: var(--accent); }
+  .btn.danger { background: rgba(255,107,53,0.1); border-color: var(--accent2); color: var(--accent2); }
+
+  /* Progress */
+  .progress-bar {
+    height: 2px;
+    background: var(--surface2);
+    border-radius: 1px;
+    margin-bottom: 24px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--green));
+    transition: width 0.3s;
+  }
+
+  .progress-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 10px;
+    color: var(--muted);
+    margin-bottom: 8px;
+    letter-spacing: 1px;
+  }
+
+  /* Add form */
+  .form-group { margin-bottom: 14px; }
+
+  .form-label {
+    display: block;
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+
+  .form-input, .form-select, .form-textarea {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 10px 12px;
+    border-radius: 6px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px;
+    outline: none;
+    transition: border-color 0.2s;
+    direction: ltr;
+  }
+
+  .form-input:focus, .form-select:focus, .form-textarea:focus {
+    border-color: var(--accent);
+  }
+
+  .form-textarea {
+    resize: vertical;
+    min-height: 70px;
+    direction: rtl;
+    text-align: right;
+    font-family: 'Noto Kufi Arabic', sans-serif;
+  }
+
+  .form-select option { background: var(--surface2); }
+
+  /* List */
+  .card-list { display: flex; flex-direction: column; gap: 8px; }
+
+  .card-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .card-item-text { flex: 1; }
+
+  .card-item-de {
+    font-size: 12px;
+    color: var(--text);
+    margin-bottom: 4px;
+    direction: ltr;
+  }
+
+  .card-item-ar {
+    font-family: 'Noto Kufi Arabic', sans-serif;
+    font-size: 12px;
+    color: var(--muted);
+    direction: rtl;
+  }
+
+  .card-item-del {
+    background: none;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 16px;
+    padding: 0 4px;
+    transition: color 0.2s;
+    flex-shrink: 0;
+  }
+
+  .card-item-del:hover { color: var(--accent2); }
+
+  /* Settings */
+  .settings-block {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 18px;
+    margin-bottom: 14px;
+  }
+
+  .settings-title {
+    font-size: 10px;
+    color: var(--accent);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+
+  .setting-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    gap: 12px;
+  }
+
+  .setting-label {
+    font-size: 12px;
+    color: var(--text);
+    flex: 1;
+  }
+
+  .setting-sub {
+    font-size: 10px;
+    color: var(--muted);
+    margin-top: 2px;
+    font-family: 'Noto Kufi Arabic', sans-serif;
+  }
+
+  .range-input {
+    width: 120px;
+    accent-color: var(--accent);
+    cursor: pointer;
+  }
+
+  .range-val {
+    font-size: 13px;
+    color: var(--accent);
+    width: 40px;
+    text-align: center;
+    font-weight: 600;
+  }
+
+  /* Toggle */
+  .toggle {
+    position: relative;
+    width: 42px;
+    height: 22px;
+    flex-shrink: 0;
+  }
+
+  .toggle input { display: none; }
+
+  .toggle-slider {
+    position: absolute;
+    inset: 0;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 11px;
+    cursor: pointer;
+    transition: all 0.3s;
+  }
+
+  .toggle-slider::after {
+    content: '';
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    background: var(--muted);
+    border-radius: 50%;
+    top: 2px;
+    left: 2px;
+    transition: all 0.3s;
+  }
+
+  .toggle input:checked + .toggle-slider {
+    background: rgba(0,212,255,0.15);
+    border-color: var(--accent);
+  }
+
+  .toggle input:checked + .toggle-slider::after {
+    transform: translateX(20px);
+    background: var(--accent);
+  }
+
+  /* Status */
+  .status-msg {
+    font-size: 11px;
+    padding: 10px 14px;
+    border-radius: 6px;
+    margin-bottom: 14px;
+    letter-spacing: 0.5px;
+    display: none;
+  }
+
+  .status-msg.show { display: block; }
+  .status-msg.ok { background: rgba(0,255,136,0.1); border: 1px solid rgba(0,255,136,0.3); color: var(--green); }
+  .status-msg.err { background: rgba(255,107,53,0.1); border: 1px solid rgba(255,107,53,0.3); color: var(--accent2); }
+
+  /* Empty state */
+  .empty {
+    text-align: center;
+    padding: 40px 20px;
+    color: var(--muted);
+    font-size: 12px;
+    letter-spacing: 1px;
+  }
+
+  .empty-icon { font-size: 32px; margin-bottom: 12px; opacity: 0.4; }
+
+  /* Category pill */
+  .cat-pill {
+    display: inline-block;
+    font-size: 9px;
+    padding: 2px 6px;
+    border-radius: 3px;
+    background: rgba(0,212,255,0.08);
+    color: var(--accent);
+    margin-top: 4px;
+    letter-spacing: 1px;
+    direction: ltr;
+  }
+
+  .stats-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+
+  .stat-box {
+    flex: 1;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px;
+    text-align: center;
+  }
+
+  .stat-num { font-size: 22px; font-weight: 600; color: var(--accent); }
+  .stat-label { font-size: 9px; color: var(--muted); letter-spacing: 1px; margin-top: 2px; }
+
+  /* Install banner */
+  .install-banner {
+    background: rgba(0,212,255,0.06);
+    border: 1px solid rgba(0,212,255,0.2);
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+  }
+
+  .install-text { font-size: 11px; color: var(--muted); }
+  .install-text strong { color: var(--accent); }
+
+  .install-btn {
+    background: rgba(0,212,255,0.15);
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    padding: 6px 12px;
+    border-radius: 4px;
+    font-size: 10px;
+    cursor: pointer;
+    font-family: 'IBM Plex Mono', monospace;
+    white-space: nowrap;
+    letter-spacing: 1px;
+    transition: all 0.2s;
+  }
+
+  .install-btn:hover { background: rgba(0,212,255,0.25); }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  .pulsing { animation: pulse 2s infinite; }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="logo">FSP <span>/ REAKTIONEN</span></div>
+    <div class="notif-badge" id="notifBadge" onclick="toggleNotifications()">
+      <div class="dot pulsing"></div>
+      <span id="notifStatus">NOTIF OFF</span>
+    </div>
+  </div>
+
+  <!-- Install Banner -->
+  <div class="install-banner" id="installBanner" style="display:none">
+    <div class="install-text"><strong>تثبيت التطبيق</strong> — يشتغل offline</div>
+    <button class="install-btn" onclick="installApp()">تثبيت</button>
+  </div>
+
+  <!-- Tabs -->
+  <div class="tabs">
+    <button class="tab active" onclick="switchTab('review')">مراجعة</button>
+    <button class="tab" onclick="switchTab('cards')">البطاقات</button>
+    <button class="tab" onclick="switchTab('add')">+ إضافة</button>
+    <button class="tab" onclick="switchTab('settings')">الإعدادات</button>
+  </div>
+
+  <!-- REVIEW TAB -->
+  <div class="section active" id="tab-review">
+
+    <div class="stats-row">
+      <div class="stat-box">
+        <div class="stat-num" id="totalCards">0</div>
+        <div class="stat-label">TOTAL</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num" id="sessionCount">0</div>
+        <div class="stat-label">SESSION</div>
+      </div>
+      <div class="stat-box">
+        <div class="stat-num" id="nextNotif">—</div>
+        <div class="stat-label">NEXT</div>
+      </div>
+    </div>
+
+    <div id="reviewArea">
+      <div class="empty">
+        <div class="empty-icon">📋</div>
+        أضف بطاقات من تبويب "البطاقات" أو "+ إضافة"
+      </div>
+    </div>
+
+  </div>
+
+  <!-- CARDS TAB -->
+  <div class="section" id="tab-cards">
+    <div id="cardList" class="card-list">
+      <div class="empty">
+        <div class="empty-icon">🗂</div>
+        لا يوجد بطاقات بعد
+      </div>
+    </div>
+  </div>
+
+  <!-- ADD TAB -->
+  <div class="section" id="tab-add">
+    <div id="addStatus" class="status-msg"></div>
+
+    <div class="form-group">
+      <label class="form-label">الجملة بالألماني (DE)</label>
+      <input type="text" class="form-input" id="inputDE" placeholder="z.B. Ich verstehe Ihre Sorgen sehr gut." dir="ltr">
+    </div>
+
+    <div class="form-group">
+      <label class="form-label" style="direction:rtl">الترجمة بالعربي</label>
+      <textarea class="form-textarea" id="inputAR" placeholder="أفهم قلقكم جيداً."></textarea>
+    </div>
+
+    <div class="form-group">
+      <label class="form-label">الفئة (Category)</label>
+      <select class="form-select" id="inputCat">
+        <option value="Empathie">Empathie — تعاطف</option>
+        <option value="Nachfrage">Nachfrage — استفسار</option>
+        <option value="Erklaerung">Erklärung — شرح</option>
+        <option value="Beruehigung">Beruhigung — تهدئة</option>
+        <option value="Aufklaerung">Aufklärung — توعية</option>
+        <option value="Ablehnung">Ablehnung — رفض</option>
+        <option value="Zustimmung">Zustimmung — موافقة</option>
+        <option value="Sonstiges">Sonstiges — أخرى</option>
+      </select>
+    </div>
+
+    <button class="btn primary" onclick="addCard()">+ إضافة البطاقة</button>
+
+    <div style="margin-top: 24px; border-top: 1px solid var(--border); padding-top: 20px;">
+      <div class="form-label" style="margin-bottom:10px">📦 استيراد جمل جاهزة (FSP Starter Pack)</div>
+      <button class="btn" onclick="loadStarterPack()">تحميل 20 جملة أساسية</button>
+    </div>
+  </div>
+
+  <!-- SETTINGS TAB -->
+  <div class="section" id="tab-settings">
+    <div id="settingsStatus" class="status-msg"></div>
+
+    <div class="settings-block">
+      <div class="settings-title">⏰ الإشعارات</div>
+
+      <div class="setting-row">
+        <div>
+          <div class="setting-label">تفعيل الإشعارات</div>
+          <div class="setting-sub">تذكير بجمل عشوائية</div>
+        </div>
+        <label class="toggle">
+          <input type="checkbox" id="notifToggle" onchange="updateNotifSettings()">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
+
+      <div class="setting-row">
+        <div>
+          <div class="setting-label">الفاصل الزمني</div>
+          <div class="setting-sub">كل كم ساعة يظهر الإشعار</div>
+        </div>
+        <input type="range" class="range-input" id="intervalRange" min="0.5" max="8" step="0.5" value="2" oninput="updateInterval(this.value)">
+        <div class="range-val" id="intervalVal">2h</div>
+      </div>
+
+      <div class="setting-row">
+        <div>
+          <div class="setting-label">وقت البداية</div>
+        </div>
+        <input type="time" class="form-input" id="startTime" value="08:00" style="width:120px; direction:ltr" onchange="updateNotifSettings()">
+      </div>
+
+      <div class="setting-row">
+        <div>
+          <div class="setting-label">وقت النهاية</div>
+        </div>
+        <input type="time" class="form-input" id="endTime" value="22:00" style="width:120px; direction:ltr" onchange="updateNotifSettings()">
+      </div>
+
+      <button class="btn primary" style="margin-top:8px" onclick="testNotification()">🔔 اختبار الإشعار الآن</button>
+    </div>
+
+    <div class="settings-block">
+      <div class="settings-title">📊 إحصائيات</div>
+      <div class="setting-row">
+        <div class="setting-label">إجمالي البطاقات</div>
+        <div style="color:var(--accent); font-size:14px; font-weight:600" id="statsTotal">0</div>
+      </div>
+      <div class="setting-row">
+        <div class="setting-label">جلسات المراجعة</div>
+        <div style="color:var(--accent); font-size:14px; font-weight:600" id="statsSession">0</div>
+      </div>
+    </div>
+
+    <div class="settings-block">
+      <div class="settings-title">⚙️ البيانات</div>
+      <div style="display:flex; gap:8px">
+        <button class="btn" onclick="exportData()">تصدير JSON</button>
+        <button class="btn danger" onclick="clearAll()">حذف الكل</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ========== STATE ==========
+let state = {
+  cards: [],
+  settings: {
+    notifEnabled: false,
+    intervalHours: 2,
+    startTime: '08:00',
+    endTime: '22:00'
+  },
+  session: 0,
+  currentIdx: 0
+};
+
+let notifTimer = null;
+let deferredPrompt = null;
+
+// ========== STARTER PACK ==========
+const STARTER_PACK = [
+  { de: "Ich verstehe Ihre Sorgen sehr gut.", ar: "أفهم قلقكم جيداً.", cat: "Empathie" },
+  { de: "Das kann ich gut nachvollziehen.", ar: "يمكنني أن أتفهم ذلك تماماً.", cat: "Empathie" },
+  { de: "Ich höre Sie.", ar: "أنا أسمعكم.", cat: "Empathie" },
+  { de: "Haben Sie noch weitere Beschwerden?", ar: "هل لديكم شكاوى أخرى؟", cat: "Nachfrage" },
+  { de: "Seit wann haben Sie diese Beschwerden?", ar: "منذ متى وأنتم تعانون من هذه الbeschwerden؟", cat: "Nachfrage" },
+  { de: "Können Sie die Schmerzen auf einer Skala von 1 bis 10 einordnen?", ar: "هل يمكنكم تقييم الألم على سلم من 1 إلى 10؟", cat: "Nachfrage" },
+  { de: "Bitte machen Sie sich keine Sorgen, wir werden alles klären.", ar: "من فضلكم لا تقلقوا، سنوضح كل شيء.", cat: "Beruehigung" },
+  { de: "Wir werden alles Mögliche für Sie tun.", ar: "سنبذل كل ما بوسعنا من أجلكم.", cat: "Beruehigung" },
+  { de: "Ich erkläre Ihnen jetzt den Befund.", ar: "سأشرح لكم الآن نتيجة الفحص.", cat: "Erklaerung" },
+  { de: "Das Medikament hat folgende Nebenwirkungen.", ar: "لهذا الدواء الآثار الجانبية التالية.", cat: "Erklaerung" },
+  { de: "Wir müssen noch einige Untersuchungen durchführen.", ar: "نحتاج إلى إجراء بعض الفحوصات الإضافية.", cat: "Aufklaerung" },
+  { de: "Ich rate Ihnen, sich zu schonen.", ar: "أنصحكم بالراحة.", cat: "Aufklaerung" },
+  { de: "Leider kann ich Ihnen das nicht versprechen.", ar: "للأسف لا أستطيع أن أعدكم بذلك.", cat: "Ablehnung" },
+  { de: "Das liegt leider außerhalb meiner Möglichkeiten.", ar: "هذا للأسف خارج نطاق إمكانياتي.", cat: "Ablehnung" },
+  { de: "Da haben Sie absolut recht.", ar: "أنتم محقون تماماً.", cat: "Zustimmung" },
+  { de: "Ich stimme Ihnen zu.", ar: "أوافقكم الرأي.", cat: "Zustimmung" },
+  { de: "Haben Sie Fragen an mich?", ar: "هل لديكم أسئلة؟", cat: "Nachfrage" },
+  { de: "Ich werde Sie jetzt untersuchen.", ar: "سأقوم الآن بفحصكم.", cat: "Erklaerung" },
+  { de: "Bitte atmen Sie tief ein und aus.", ar: "من فضلكم تنفسوا بعمق للداخل والخارج.", cat: "Erklaerung" },
+  { de: "Wir halten Sie über jeden Schritt informiert.", ar: "سنبقيكم على علم بكل خطوة.", cat: "Aufklaerung" }
+];
+
+// ========== STORAGE ==========
+function save() {
+  localStorage.setItem('fsp_state', JSON.stringify(state));
+}
+
+function load() {
+  const saved = localStorage.getItem('fsp_state');
+  if (saved) {
+    const s = JSON.parse(saved);
+    state.cards = s.cards || [];
+    state.settings = { ...state.settings, ...s.settings };
+    state.session = s.session || 0;
+  }
+  updateUI();
+}
+
+// ========== TABS ==========
+function switchTab(tab) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + tab).classList.add('active');
+  event.target.classList.add('active');
+  if (tab === 'review') renderReview();
+  if (tab === 'cards') renderCardList();
+  if (tab === 'settings') updateStatsUI();
+}
+
+// ========== CARDS ==========
+function addCard() {
+  const de = document.getElementById('inputDE').value.trim();
+  const ar = document.getElementById('inputAR').value.trim();
+  const cat = document.getElementById('inputCat').value;
+
+  if (!de || !ar) {
+    showStatus('addStatus', 'يرجى ملء الحقلين', 'err');
+    return;
+  }
+
+  state.cards.push({ id: Date.now(), de, ar, cat, added: new Date().toISOString() });
+  save();
+
+  document.getElementById('inputDE').value = '';
+  document.getElementById('inputAR').value = '';
+  showStatus('addStatus', '✓ تمت إضافة البطاقة', 'ok');
+  updateUI();
+}
+
+function loadStarterPack() {
+  let added = 0;
+  STARTER_PACK.forEach(c => {
+    if (!state.cards.find(x => x.de === c.de)) {
+      state.cards.push({ id: Date.now() + Math.random(), de: c.de, ar: c.ar, cat: c.cat, added: new Date().toISOString() });
+      added++;
+    }
+  });
+  save();
+  showStatus('addStatus', `✓ تمت إضافة ${added} بطاقة`, 'ok');
+  updateUI();
+}
+
+function deleteCard(id) {
+  state.cards = state.cards.filter(c => c.id !== id);
+  save();
+  renderCardList();
+  updateUI();
+}
+
+function renderCardList() {
+  const el = document.getElementById('cardList');
+  if (state.cards.length === 0) {
+    el.innerHTML = '<div class="empty"><div class="empty-icon">🗂</div>لا يوجد بطاقات بعد</div>';
+    return;
+  }
+  el.innerHTML = state.cards.map(c => `
+    <div class="card-item">
+      <div class="card-item-text">
+        <div class="card-item-de">${c.de}</div>
+        <div class="card-item-ar">${c.ar}</div>
+        <div class="cat-pill">${c.cat}</div>
+      </div>
+      <button class="card-item-del" onclick="deleteCard(${c.id})">×</button>
+    </div>
+  `).join('');
+}
+
+// ========== REVIEW ==========
+function renderReview() {
+  const el = document.getElementById('reviewArea');
+  if (state.cards.length === 0) {
+    el.innerHTML = '<div class="empty"><div class="empty-icon">📋</div>أضف بطاقات من تبويب "+ إضافة"</div>';
+    return;
+  }
+
+  const idx = state.currentIdx % state.cards.length;
+  const card = state.cards[idx];
+
+  el.innerHTML = `
+    <div class="progress-label">
+      <span>${idx + 1} / ${state.cards.length}</span>
+      <span>${card.cat}</span>
+    </div>
+    <div class="progress-bar">
+      <div class="progress-fill" style="width:${((idx+1)/state.cards.length*100)}%"></div>
+    </div>
+
+    <div class="card-wrapper" onclick="flipCard(this)">
+      <div class="card" id="flashcard">
+        <div class="card-face card-front">
+          <div class="card-category">${card.cat}</div>
+          <div class="card-lang">DEUTSCH</div>
+          <div class="card-de">${card.de}</div>
+          <div class="card-hint">اضغط للترجمة</div>
+        </div>
+        <div class="card-face card-back">
+          <div class="card-lang">عربي</div>
+          <div class="card-ar">${card.ar}</div>
+          <div class="card-de" style="font-size:13px; color:var(--muted); margin-top:12px">${card.de}</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="nav-row">
+      <button class="btn" onclick="prevCard()">◀ السابق</button>
+      <button class="btn" onclick="randomCard()">⟳ عشوائي</button>
+      <button class="btn primary" onclick="nextCard()">التالي ▶</button>
+    </div>
+  `;
+}
+
+function flipCard(wrapper) {
+  const card = wrapper.querySelector('.card');
+  card.classList.toggle('flipped');
+  state.session++;
+  document.getElementById('sessionCount').textContent = state.session;
+  save();
+}
+
+function nextCard() {
+  state.currentIdx = (state.currentIdx + 1) % state.cards.length;
+  renderReview();
+}
+
+function prevCard() {
+  state.currentIdx = (state.currentIdx - 1 + state.cards.length) % state.cards.length;
+  renderReview();
+}
+
+function randomCard() {
+  state.currentIdx = Math.floor(Math.random() * state.cards.length);
+  renderReview();
+}
+
+// ========== NOTIFICATIONS ==========
+async function toggleNotifications() {
+  if (!('Notification' in window)) {
+    alert('المتصفح لا يدعم الإشعارات');
+    return;
+  }
+
+  if (Notification.permission === 'denied') {
+    alert('الإشعارات محجوبة. افتح إعدادات المتصفح وأعد تفعيلها.');
+    return;
+  }
+
+  if (Notification.permission !== 'granted') {
+    const perm = await Notification.requestPermission();
+    if (perm !== 'granted') return;
+  }
+
+  state.settings.notifEnabled = !state.settings.notifEnabled;
+  document.getElementById('notifToggle').checked = state.settings.notifEnabled;
+  updateNotifBadge();
+  scheduleNotifications();
+  save();
+}
+
+function updateNotifSettings() {
+  state.settings.notifEnabled = document.getElementById('notifToggle').checked;
+  state.settings.intervalHours = parseFloat(document.getElementById('intervalRange').value);
+  state.settings.startTime = document.getElementById('startTime').value;
+  state.settings.endTime = document.getElementById('endTime').value;
+  updateNotifBadge();
+  scheduleNotifications();
+  save();
+}
+
+function updateInterval(val) {
+  document.getElementById('intervalVal').textContent = val + 'h';
+  state.settings.intervalHours = parseFloat(val);
+  scheduleNotifications();
+  save();
+}
+
+function updateNotifBadge() {
+  const badge = document.getElementById('notifBadge');
+  const label = document.getElementById('notifStatus');
+  if (state.settings.notifEnabled && Notification.permission === 'granted') {
+    badge.classList.add('active');
+    label.textContent = 'NOTIF ON';
+  } else {
+    badge.classList.remove('active');
+    label.textContent = 'NOTIF OFF';
+  }
+}
+
+function scheduleNotifications() {
+  if (notifTimer) clearInterval(notifTimer);
+  updateNextNotifDisplay();
+
+  if (!state.settings.notifEnabled || Notification.permission !== 'granted') return;
+  if (state.cards.length === 0) return;
+
+  const ms = state.settings.intervalHours * 60 * 60 * 1000;
+
+  notifTimer = setInterval(() => {
+    if (isWithinActiveHours()) sendRandomNotif();
+    updateNextNotifDisplay();
+  }, ms);
+}
+
+function isWithinActiveHours() {
+  const now = new Date();
+  const cur = now.getHours() * 60 + now.getMinutes();
+  const [sh, sm] = state.settings.startTime.split(':').map(Number);
+  const [eh, em] = state.settings.endTime.split(':').map(Number);
+  return cur >= sh * 60 + sm && cur <= eh * 60 + em;
+}
+
+function sendRandomNotif() {
+  if (state.cards.length === 0) return;
+  const card = state.cards[Math.floor(Math.random() * state.cards.length)];
+  new Notification('FSP Reaktionen 🏥', {
+    body: card.de + '\n' + card.ar,
+    icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="%230a0f1a"/><text y=".9em" font-size="90">🏥</text></svg>',
+    tag: 'fsp-reminder',
+    renotify: true
+  });
+}
+
+function testNotification() {
+  if (Notification.permission !== 'granted') {
+    Notification.requestPermission().then(p => {
+      if (p === 'granted') sendRandomNotif();
+    });
+  } else {
+    sendRandomNotif();
+  }
+  showStatus('settingsStatus', '✓ تم إرسال إشعار تجريبي', 'ok');
+}
+
+function updateNextNotifDisplay() {
+  const el = document.getElementById('nextNotif');
+  if (!el) return;
+  if (!state.settings.notifEnabled || !notifTimer) {
+    el.textContent = '—';
+    return;
+  }
+  el.textContent = state.settings.intervalHours + 'h';
+}
+
+// ========== UI HELPERS ==========
+function updateUI() {
+  const total = state.cards.length;
+  document.getElementById('totalCards').textContent = total;
+  document.getElementById('sessionCount').textContent = state.session;
+  updateNotifBadge();
+}
+
+function updateStatsUI() {
+  document.getElementById('statsTotal').textContent = state.cards.length;
+  document.getElementById('statsSession').textContent = state.session;
+  document.getElementById('notifToggle').checked = state.settings.notifEnabled;
+  document.getElementById('intervalRange').value = state.settings.intervalHours;
+  document.getElementById('intervalVal').textContent = state.settings.intervalHours + 'h';
+  document.getElementById('startTime').value = state.settings.startTime;
+  document.getElementById('endTime').value = state.settings.endTime;
+}
+
+function showStatus(id, msg, type) {
+  const el = document.getElementById(id);
+  el.textContent = msg;
+  el.className = `status-msg show ${type}`;
+  setTimeout(() => el.classList.remove('show'), 3000);
+}
+
+// ========== EXPORT ==========
+function exportData() {
+  const blob = new Blob([JSON.stringify(state.cards, null, 2)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'fsp_reaktionen.json';
+  a.click();
+}
+
+function clearAll() {
+  if (confirm('هل أنت متأكد من حذف جميع البطاقات؟')) {
+    state.cards = [];
+    state.session = 0;
+    state.currentIdx = 0;
+    save();
+    updateUI();
+    renderReview();
+    renderCardList();
+    showStatus('settingsStatus', '✓ تم حذف جميع البطاقات', 'ok');
+  }
+}
+
+// ========== PWA INSTALL ==========
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  document.getElementById('installBanner').style.display = 'flex';
+});
+
+function installApp() {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(() => {
+      deferredPrompt = null;
+      document.getElementById('installBanner').style.display = 'none';
+    });
+  }
+}
+
+// ========== SERVICE WORKER (inline) ==========
+function registerSW() {
+  if ('serviceWorker' in navigator) {
+    const swCode = `
+self.addEventListener('install', e => self.skipWaiting());
+self.addEventListener('activate', e => clients.claim());
+self.addEventListener('fetch', e => {
+  e.respondWith(caches.match(e.request).then(r => r || fetch(e.request)));
+});
+    `;
+    const blob = new Blob([swCode], { type: 'application/javascript' });
+    const swUrl = URL.createObjectURL(blob);
+    navigator.serviceWorker.register(swUrl).catch(() => {});
+  }
+}
+
+// ========== INIT ==========
+load();
+registerSW();
+renderReview();
+updateNotifBadge();
+</script>
+</body>
+</html>
